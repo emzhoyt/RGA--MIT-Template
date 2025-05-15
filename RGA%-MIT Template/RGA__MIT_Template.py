@@ -13,10 +13,10 @@ excel_file = r'\\TRUENAS\PlasmaFlow\Staff\Emily H\PYTHON\RGA%-MIT Template\RGA%-
 base_name = "5-14-25 MIT TESTING-tab2" # Base name used for versioned filenames and plot title
 output_dir = "."  # Or your desired output path
 data_ext = ".xlsx"
-column_headers = ['Time','CH4%', 'H2%', 'O2%', 'CO%', 'CO2%', 'H2O%', 'C3H8%', 'N2corr CH4 Conv%']
+column_headers = ['Time','N2%', 'CH4%', 'H2%', 'O2%', 'CO%', 'CO2%', 'H2O%', 'C3H8%', 'N2corr CH4 Conv%']
 plot_colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:pink', 'tab:red', 'tab:purple']
-y_axis1_limit = (0, 200)   # Left Y-axis for TC2–TC6
-y_axis2_limit = (0, 350)
+y_axis1_limit = (0, 15)   # Left Y-axis for TC2–TC6
+y_axis2_limit = (30, 100)
 
 # 🔧 ============================== #
 
@@ -36,13 +36,12 @@ while True:
 # Load the workbook
 wb = load_workbook(excel_file)
 
-df = pd.read_excel(excel_file, engine='openpyxl', skiprows=39)
+df = pd.read_excel(excel_file, engine='openpyxl', skiprows=39)#use subset = df.iloc[0:100] (first 100 rows after skipping the first 36 in Excel)
 print("Columns in the DataFrame:", df.columns.tolist())
 # Load the Excel file, skipping the first 36 rows, and let pandas use the 37th row as headers
-df = pd.read_excel(excel_file, engine='openpyxl', skiprows=39)  #use subset = df.iloc[0:100] (first 100 rows after skipping the first 36 in Excel)
 df['Time'] = pd.to_datetime(df['Time']) #Convert the 'Time' column to datetime (if not already)
-start_time = pd.to_datetime('9:08:00 AM').time() #Define your start and end times
-end_time = pd.to_datetime('2:23:55 PM').time() #Define your start and end times
+start_time = pd.to_datetime('9:24:00 AM').time() #Define your start and end times
+end_time = pd.to_datetime('12:40:00 PM').time() #Define your start and end times
 df = df[df['Time'].dt.time.between(start_time, end_time)] # 🔥 Filter rows within your time range
 
 
@@ -55,14 +54,15 @@ ax1.xaxis.set_major_formatter(time_format)
 
 # Plot each of the columns S to Y (index 18 to 24)
 ax2 = ax1.twinx()
-ax2.plot(df['Time'], df['H2%'], label='H2%', linewidth=2, color='tab:blue')
+ax2.plot(df['Time'], df['N2corr CH4 Conv%'], label='N2corr CH4 Conv%', linewidth=2, color='tab:blue')
+ax2.plot(df['Time'], df['N2%'], label='N2%', linewidth=2, color='tab:brown')
 ax1.plot(df['Time'], df['CH4%'], label='CH4%', linewidth=2, color='tab:red')
 ax1.plot(df['Time'], df['O2%'], label='O2%', linewidth=2, color='tab:pink')
 ax1.plot(df['Time'], df['CO%'], label='CO%', linewidth=2, color='tab:cyan')
 ax1.plot(df['Time'], df['CO2%'], label='CO2%', linewidth=2, color='tab:gray')
 ax1.plot(df['Time'], df['H2O%'], label='H2O%', linewidth=2, color='tab:green')
-ax1.plot(df['Time'], df['C3H8%'], label='C2H8%', linewidth=2, color='tab:orange')
-ax1.plot(df['Time'], df['N2corr CH4 Conv%'], label='N2corr CH4 Conv%', linewidth=2, color='tab:purple')
+ax1.plot(df['Time'], df['C3H8%'], label='C3H8%', linewidth=2, color='tab:orange')
+ax1.plot(df['Time'], df['H2%'], label='H2%', linewidth=2, color='tab:purple')
 
 # Set x-axis intervals
 ax1.xaxis.set_major_locator(mdates.MinuteLocator(interval=2))  # Change interval to whatever works
@@ -70,10 +70,6 @@ ax1.xaxis.set_minor_locator(mdates.MinuteLocator(interval=1))  # Optional: Add m
 
 # Rotate the x-axis labels for better visibility, could add #fontweight='bold'if needed
 plt.setp(ax1.get_xticklabels(), rotation=45, ha='right', fontsize='8') 
-
-# Manually setting Y-axis ranges
-ax1.set_ylim(0, 20) 
-ax2.set_ylim(0, 100)
 
 # Set y-axis intervals
 ax1.yaxis.set_major_locator(ticker.MultipleLocator(2))  # Change interval to whatever works
@@ -88,13 +84,16 @@ ax1.set_xlabel('Time', fontsize=10, fontweight='bold', fontname='Arial')
 #Y1 axis
 ax1.set_ylabel('Species %', fontsize=11, fontweight='bold', fontname='Arial')
 #Y2 axis
-ax2.set_ylabel('H2 %', fontsize=11, fontweight='bold', fontname='Arial')
+ax2.set_ylabel('N2 Conv% & N2%', fontsize=11, fontweight='bold', fontname='Arial')
 
 # Combine legends from both y-axes
 lines1, labels1 = ax1.get_legend_handles_labels()
 lines2, labels2 = ax2.get_legend_handles_labels()
 all_lines = lines1 + lines2
 all_labels = labels1 + labels2
+
+ax1.set_ylim(*y_axis1_limit)
+ax2.set_ylim(*y_axis2_limit)
 
 # Place the combined legend outside the plot
 legend = ax1.legend(
