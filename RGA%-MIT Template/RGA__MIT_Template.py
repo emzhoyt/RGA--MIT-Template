@@ -14,12 +14,18 @@ base_name = "5-14-25 MIT TESTING-tab2" # Base name used for versioned filenames 
 output_dir = "."  # Or your desired output path
 data_ext = ".xlsx"
 column_headers = ['Time','N2%', 'CH4%', 'H2%', 'O2%', 'CO%', 'CO2%', 'H2O%', 'C3H8%', 'N2corr CH4 Conv%']
-plot_colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:pink', 'tab:red', 'tab:purple']
+plot_colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:pink', 'tab:red', 'tab:purple', 'tab:brown','tab:olive', 'tab:cyan', 'tab:gray']
 y_axis1_limit = (0, 15)   # Left Y-axis for TC2–TC6
 y_axis2_limit = (30, 100)
 
+# Set up the plot (this is where we define ax1)
+fig, ax1 = plt.subplots(figsize=(12, 6))
+plot_title = base_name
+xlabel= 'Time'
+ax2 = ax1.twinx()
+ylabel_left= 'Species %'
+ylabel_right= 'N2 Conv% & N2%'
 # 🔧 ============================== #
-
 
 # Define base name and output path
 output_dir = "."  # Or your desired output path
@@ -44,25 +50,18 @@ start_time = pd.to_datetime('9:24:00 AM').time() #Define your start and end time
 end_time = pd.to_datetime('12:40:00 PM').time() #Define your start and end times
 df = df[df['Time'].dt.time.between(start_time, end_time)] # 🔥 Filter rows within your time range
 
-
-# Set up the plot (this is where we define ax1)
-fig, ax1 = plt.subplots(figsize=(12, 6))
-
 # Time formatting for X-axis
 time_format = mdates.DateFormatter('%I:%M:%S %p')  # Display in Hour:Minute:Second & 12 hr format
 ax1.xaxis.set_major_formatter(time_format)
 
-# Plot each of the columns S to Y (index 18 to 24)
-ax2 = ax1.twinx()
-ax2.plot(df['Time'], df['N2corr CH4 Conv%'], label='N2corr CH4 Conv%', linewidth=2, color='tab:blue')
-ax2.plot(df['Time'], df['N2%'], label='N2%', linewidth=2, color='tab:brown')
-ax1.plot(df['Time'], df['CH4%'], label='CH4%', linewidth=2, color='tab:red')
-ax1.plot(df['Time'], df['O2%'], label='O2%', linewidth=2, color='tab:pink')
-ax1.plot(df['Time'], df['CO%'], label='CO%', linewidth=2, color='tab:cyan')
-ax1.plot(df['Time'], df['CO2%'], label='CO2%', linewidth=2, color='tab:gray')
-ax1.plot(df['Time'], df['H2O%'], label='H2O%', linewidth=2, color='tab:green')
-ax1.plot(df['Time'], df['C3H8%'], label='C3H8%', linewidth=2, color='tab:orange')
-ax1.plot(df['Time'], df['H2%'], label='H2%', linewidth=2, color='tab:purple')
+# Loop through columns and colors
+for col_name, color in zip(column_headers, plot_colors):
+    if col_name == 'Time':
+        continue
+    elif col_name == 'N2corr CH4 Conv%':
+        ax2.plot(df['Time'], df[col_name], label=col_name, linewidth=2, color=color)
+    else:
+        ax1.plot(df['Time'], df[col_name], label=col_name, linewidth=2, color=color)
 
 # Set x-axis intervals
 ax1.xaxis.set_major_locator(mdates.MinuteLocator(interval=2))  # Change interval to whatever works
@@ -75,16 +74,21 @@ plt.setp(ax1.get_xticklabels(), rotation=45, ha='right', fontsize='8')
 ax1.yaxis.set_major_locator(ticker.MultipleLocator(2))  # Change interval to whatever works
 ax2.yaxis.set_major_locator(ticker.MultipleLocator(10))  # Change interval to whatever works
 
-
-# Labels 
 # Title
-plt.title('5-14-25 MIT TESTING-tab2', fontsize=14, fontweight='bold', color='black', loc='center', pad=15, fontname='Arial') #where pad = the pixel spacing between the graph and title
-#X axis
-ax1.set_xlabel('Time', fontsize=10, fontweight='bold', fontname='Arial')
-#Y1 axis
-ax1.set_ylabel('Species %', fontsize=11, fontweight='bold', fontname='Arial')
-#Y2 axis
-ax2.set_ylabel('N2 Conv% & N2%', fontsize=11, fontweight='bold', fontname='Arial')
+title_kwargs = {
+    'fontsize': 14,
+    'fontweight': 'bold',
+    'color': 'black',
+    'loc': 'center',
+    'pad': 15,
+    'fontname': 'Arial'
+}
+
+label_kwargs = {
+    'fontsize': 11,
+    'fontweight': 'bold',
+    'fontname': 'Arial'
+}
 
 # Combine legends from both y-axes
 lines1, labels1 = ax1.get_legend_handles_labels()
@@ -110,6 +114,7 @@ for text in legend.get_texts():
     text.set_fontname('Arial')
 
 ax1.grid(True, which='both', linestyle='--', linewidth=0.5, alpha=0.7)
+plt.title(plot_title, **title_kwargs)
 plt.tight_layout()
 # Style tick labels (x-axis and both y-axes)
 plt.setp(ax1.get_xticklabels(), fontsize=6, fontweight='bold', fontname='Arial')
