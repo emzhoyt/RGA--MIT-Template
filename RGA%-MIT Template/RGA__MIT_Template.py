@@ -9,11 +9,11 @@ import matplotlib.ticker as ticker
 # 🔧 ============================== #
 #     REQUIRED UPDATES FOR NEW FILE
 
-excel_file = r'\\TRUENAS\PlasmaFlow\Staff\Emily H\PYTHON\RGA% Code Template\RGA% Code Template\4-14-25 TC2-R2 TESTING-%.xlsx'
-base_name = "4-14-25 TC2-R2 TESTING-%" # Base name used for versioned filenames and plot title
+excel_file = r'\\TRUENAS\PlasmaFlow\Staff\Emily H\PYTHON\RGA%-MIT Template\RGA%-MIT Template\RGA%-MIT Template\5-14-25 MIT TESTING-tab2.xlsx'
+base_name = "5-14-25 MIT TESTING-tab2" # Base name used for versioned filenames and plot title
 output_dir = "."  # Or your desired output path
 data_ext = ".xlsx"
-column_headers = ['TIME', 'H2%', 'CH4%', 'C2H2%', 'C2H4%', 'C3H8%', 'C3H6%']
+column_headers = ['Time','CH4%', 'H2%', 'O2%', 'CO%', 'CO2%', 'H2O%', 'C3H8%', 'N2corr CH4 Conv%']
 plot_colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:pink', 'tab:red', 'tab:purple']
 y_axis1_limit = (0, 200)   # Left Y-axis for TC2–TC6
 y_axis2_limit = (0, 350)
@@ -36,12 +36,15 @@ while True:
 # Load the workbook
 wb = load_workbook(excel_file)
 
+df = pd.read_excel(excel_file, engine='openpyxl', skiprows=39)
+print("Columns in the DataFrame:", df.columns.tolist())
 # Load the Excel file, skipping the first 36 rows, and let pandas use the 37th row as headers
-df = pd.read_excel(excel_file, engine='openpyxl', skiprows=36)  #use subset = df.iloc[0:100] (first 100 rows after skipping the first 36 in Excel)
+df = pd.read_excel(excel_file, engine='openpyxl', skiprows=39)  #use subset = df.iloc[0:100] (first 100 rows after skipping the first 36 in Excel)
 df['Time'] = pd.to_datetime(df['Time']) #Convert the 'Time' column to datetime (if not already)
-start_time = pd.to_datetime('3:55:00 PM').time() #Define your start and end times
-end_time = pd.to_datetime('4:32:00 PM').time() #Define your start and end times
+start_time = pd.to_datetime('9:08:00 AM').time() #Define your start and end times
+end_time = pd.to_datetime('2:23:55 PM').time() #Define your start and end times
 df = df[df['Time'].dt.time.between(start_time, end_time)] # 🔥 Filter rows within your time range
+
 
 # Set up the plot (this is where we define ax1)
 fig, ax1 = plt.subplots(figsize=(12, 6))
@@ -54,10 +57,12 @@ ax1.xaxis.set_major_formatter(time_format)
 ax2 = ax1.twinx()
 ax2.plot(df['Time'], df['H2%'], label='H2%', linewidth=2, color='tab:blue')
 ax1.plot(df['Time'], df['CH4%'], label='CH4%', linewidth=2, color='tab:red')
-ax1.plot(df['Time'], df['C2H2%'], label='C2H2%', linewidth=2, color='tab:pink')
-ax1.plot(df['Time'], df['C2H4%'], label='C2H4%', linewidth=2, color='tab:cyan')
-ax1.plot(df['Time'], df['C3H8%'], label='C3H8%', linewidth=2, color='tab:gray')
-ax1.plot(df['Time'], df['C2H6%'], label='C2H6%', linewidth=2, color='tab:green')
+ax1.plot(df['Time'], df['O2%'], label='O2%', linewidth=2, color='tab:pink')
+ax1.plot(df['Time'], df['CO%'], label='CO%', linewidth=2, color='tab:cyan')
+ax1.plot(df['Time'], df['CO2%'], label='CO2%', linewidth=2, color='tab:gray')
+ax1.plot(df['Time'], df['H2O%'], label='H2O%', linewidth=2, color='tab:green')
+ax1.plot(df['Time'], df['C3H8%'], label='C2H8%', linewidth=2, color='tab:orange')
+ax1.plot(df['Time'], df['N2corr CH4 Conv%'], label='N2corr CH4 Conv%', linewidth=2, color='tab:purple')
 
 # Set x-axis intervals
 ax1.xaxis.set_major_locator(mdates.MinuteLocator(interval=2))  # Change interval to whatever works
@@ -77,7 +82,7 @@ ax2.yaxis.set_major_locator(ticker.MultipleLocator(10))  # Change interval to wh
 
 # Labels 
 # Title
-plt.title('4-14-25 R1H PRODUCTION - RGA %', fontsize=14, fontweight='bold', color='black', loc='center', pad=15, fontname='Arial') #where pad = the pixel spacing between the graph and title
+plt.title('5-14-25 MIT TESTING-tab2', fontsize=14, fontweight='bold', color='black', loc='center', pad=15, fontname='Arial') #where pad = the pixel spacing between the graph and title
 #X axis
 ax1.set_xlabel('Time', fontsize=10, fontweight='bold', fontname='Arial')
 #Y1 axis
