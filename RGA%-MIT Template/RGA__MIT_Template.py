@@ -7,9 +7,9 @@ from openpyxl import load_workbook
 import matplotlib.ticker as ticker
 
 # 🔧 ===============================================================================================================🔧 #
-#    🔧 ==========================================================================================================🔧 #
-#      🔧 ======================================================================================================🔧 #
-#        🔧 ==================================================================================================🔧 #
+#    🔧 ==========================================================================================================🔧   #
+#      🔧 ======================================================================================================🔧     #
+#        🔧 ==================================================================================================🔧       #
 #                                                 REQUIRED UPDATES FOR NEW FILE
 
 excel_file = r'\\TRUENAS\PlasmaFlow\Staff\Emily H\PYTHON\RGA%-MIT Template\RGA%-MIT Template\RGA%-MIT Template\5-14-25 MIT TESTING-tab2.xlsx'
@@ -18,12 +18,13 @@ output_dir = "."  # Or your desired output path
 data_ext = ".xlsx"
 plt_ext = ".png"
 
-column_headers = ['Time','N2%', 'CH4%', 'H2%', 'O2%', 'CO%', 'CO2%', 'H2O%', 'C3H8%', 'N2corr CH4 Conv%']
-plot_colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:pink', 'tab:red', 'tab:purple', 'tab:brown','tab:olive', 'tab:cyan', 'tab:gray']
+column_headers = ['Time','N2%', 'CH4%', 'H2%', 'O2%', 'CO%', 'CO2%', 'H2O%', 'C3H8%', 'N2corr CH4 Conv%', 'Samples']
+plot_colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:pink', 'tab:red', 'tab:purple', 'tab:brown','tab:olive', 'tab:cyan', 'tab:gray', '#bdbdbd'] #additional colors: https://colorbrewer2.org/#type=sequential&scheme=Greys&n=3
 xlabel= 'Time'
 ylabel_left= 'Species %'
 ylabel_right= 'N2corr CH4 Conv% & N2%'
-ax2_columns = ['N2corr CH4 Conv%', 'N2%']
+ax2_columns = ['N2corr CH4 Conv%', 'N2%, Samples']
+bar_columns = ['Samples'] 
 y_axis1_limit = (0, 15)   # Left Y-axis 
 y_axis2_limit = (30, 100)
 start_time = pd.to_datetime('9:24:00 AM').time() #Define your start times
@@ -33,9 +34,9 @@ end_time = pd.to_datetime('12:40:00 PM').time() #Define your end times
 fig, ax1 = plt.subplots(figsize=(12, 6))
 plot_title = base_name
 ax2 = ax1.twinx()
-#        🔧 ==================================================================================================🔧 #
-#      🔧 ======================================================================================================🔧 #
-#    🔧 ==========================================================================================================🔧 #
+#        🔧 ==================================================================================================🔧       #
+#      🔧 ======================================================================================================🔧     #
+#    🔧 ==========================================================================================================🔧   #
 # 🔧 ===============================================================================================================🔧 #
 
 # 🔁 Find next available version number
@@ -64,6 +65,8 @@ ax1.xaxis.set_major_formatter(time_format)
 for col_name, color in zip(column_headers, plot_colors): #this creates the loop to pair column headers with the plot colors
     if col_name == xlabel: #says to skip this iteration if x = " " 
         continue
+    elif col_name in bar_columns:
+        ax2.bar(df[xlabel], df[col_name], label=col_name, color=color, alpha=0.5, width=0.0008)  # adjust width as needed
     elif col_name in ax2_columns: #if the columns name is x then skip plotting (else if)
         ax2.plot(df[xlabel], df[col_name], label=col_name, linewidth=2, color=color)
     else: #says to plot all other data on a different axis
@@ -95,6 +98,9 @@ label_kwargs = {
     'fontweight': 'bold',
     'fontname': 'Arial'
 }
+
+ax1.set_ylabel(ylabel_left, **label_kwargs)
+ax2.set_ylabel(ylabel_right, **label_kwargs)
 
 # Combine legends from both y-axes
 lines1, labels1 = ax1.get_legend_handles_labels()
